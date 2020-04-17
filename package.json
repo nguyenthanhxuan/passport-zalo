@@ -1,0 +1,22 @@
+{
+  "name": "passport-zalo",
+  "version": "1.0.0",
+  "description": "Passport strategy for authenticating with Zalo. An application popular in Viet Nam",
+  "main": "./lib",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nguyenthanhxuan/passport-zalo.git"
+  },
+  "author": "Xuan Nguyen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nguyenthanhxuan/passport-zalo/issues"
+  },
+  "homepage": "https://github.com/nguyenthanhxuan/passport-zalo#readme",
+  "dependencies": {
+    "passport-strategy": "^1.0.0"
+  }
+}
