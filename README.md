@@ -8,6 +8,10 @@ Zalo using OAuth2 method to authenciation but don't know why they are use differ
 
 OAuth2 using: `clientID`, `clientSecret` but Zalo using `app_id`, `app_secret`
 
+## Install
+
+    $ npm i @xvn/passport-zalo
+
 ## Usage
 
 ### Basic conept

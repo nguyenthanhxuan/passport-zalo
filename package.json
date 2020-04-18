@@ -1,6 +1,6 @@
 {
-  "name": "passport-zalo",
-  "version": "1.0.0",
+  "name": "@xvn/passport-zalo",
+  "version": "1.0.2",
   "description": "Passport strategy for authenticating with Zalo. An application popular in Viet Nam",
   "keywords": [
     "passport",
@@ -28,5 +28,9 @@
   "homepage": "https://github.com/nguyenthanhxuan/passport-zalo#readme",
   "dependencies": {
     "passport-strategy": "^1.0.0"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {}
 }
