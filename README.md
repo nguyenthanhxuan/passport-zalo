@@ -71,4 +71,4 @@ app.get(
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2020 Xuan Nguyen <[https://nguyenthanhxuan.name.vn](https://nguyenthanhxuan.name.vn)>
+Copyright (c) 2020 Xuan Nguyen <[https://nguyenthanhxuan.name.vn](https://nguyenthanhxuan.name.vn)> @Email at [xuan12k@gmail.com](mailto:xuan12k@gmail.com)
