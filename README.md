@@ -58,8 +58,8 @@ application:
 app.get("/auth/zalo", passport.authenticate("zalo"));
 
 app.get(
-  "/auth/facebook/callback",
-  passport.authenticate("facebook", { failureRedirect: "/login" }),
+  "/auth/zalo/callback",
+  passport.authenticate("zalo", { failureRedirect: "/login" }),
   function (req, res) {
     // Successful authentication, redirect home.
     res.redirect("/");
