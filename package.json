@@ -2,6 +2,16 @@
   "name": "passport-zalo",
   "version": "1.0.0",
   "description": "Passport strategy for authenticating with Zalo. An application popular in Viet Nam",
+  "keywords": [
+    "passport",
+    "auth",
+    "authn",
+    "authentication",
+    "authz",
+    "authorization",
+    "oauth2",
+    "zalo"
+  ],
   "main": "./lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
