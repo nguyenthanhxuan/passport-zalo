@@ -6,7 +6,7 @@ Passport strategy for authenticating with Zalo. An application popular in Viet N
 
 Zalo using OAuth2 method to authenciation but don't know why they are use different url parameter with OAuth2.
 
-OAuth2 using: clientID, clientSecret but Zalo using app_id, app_secret
+OAuth2 using: `clientID`, `clientSecret` but Zalo using `app_id`, `app_secret`
 
 ## Usage
 
