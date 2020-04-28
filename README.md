@@ -2,7 +2,7 @@
 
 Passport strategy for authenticating with Zalo. An application popular in Viet Nam
 
-## Reson to make this
+## Reason to make this
 
 Zalo using OAuth2 method to authenciation but don't know why they are use different url parameter with OAuth2.
 
