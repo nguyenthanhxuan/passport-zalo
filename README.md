@@ -1,54 +1,87 @@
 # passport-zalo
 
-Passport strategy for authenticating with Zalo. An application popular in Viet Nam
+Passport strategy for authenticating with [Zalo](https://zalo.me/), a popular messaging application in Vietnam.
 
-## Reason to make this
-
-Zalo using OAuth2 method to authenciation but don't know why they are use different url parameter with OAuth2.
-
-OAuth2 using: `clientID`, `clientSecret` but Zalo using `app_id`, `app_secret`
+Uses the **Zalo OAuth v4 API** with PKCE (Proof Key for Code Exchange) support.
 
 ## Install
 
     $ npm i @xvn/passport-zalo
 
+## Prerequisites
+
+- A Zalo application with an `app_id` and `app_secret` from [Zalo Developers](https://developers.zalo.me/)
+- **Session middleware** (e.g. `express-session`) — required for PKCE flow
+
 ## Usage
 
-### Basic conept
+### Zalo OAuth v4 API
 
-Reference document: [Zalo Development](https://developers.zalo.me/docs/api/social-api/tai-lieu/bat-dau-nhanh-post-1011)
+Reference: [Zalo Social API](https://developers.zalo.me/docs/social-api/tai-lieu/tong-quan)
 
-List of parameter using on Zalo:
+**Parameters:**
 
-- app_id: Application ID
-- app_secret: Application Secret
-- redirect_uri: Callback URL
+| Parameter | Description |
+|---|---|
+| `app_id` | Application ID |
+| `app_secret` | Application Secret (sent via `secret_key` header) |
+| `redirect_uri` | Callback URL |
+| `code_challenge` | PKCE code challenge (S256, generated automatically) |
 
-List of URL using on Zalo:
+**Endpoints:**
 
-- Auth URL: [https://oauth.zaloapp.com/v3/auth?app_id={1}&redirect_uri={2}&state={3}](https://oauth.zaloapp.com/v3/auth?app_id={1}&redirect_uri={2}&state={3})
-- Get ACCESS TOKEN: [https://oauth.zaloapp.com/v3/access_token?app_id={1}&app_secret={2}&code={3}](https://oauth.zaloapp.com/v3/access_token?app_id={1}&app_secret={2}&code={3})
-- Callback URL: it is on your app; example: [http://your-callback.com?code=123456&state={state-params}](http://your-callback.com?code=123456&state={state-params})
-- Get Profile user: [https://graph.zalo.me/v2.0/me?access_token=<User_Access_Token>&fields=id,birthday,name,gender,picture](https://graph.zalo.me/v2.0/me?access_token=<User_Access_Token>&fields=id,birthday,name,gender,picture)
+| Endpoint | URL |
+|---|---|
+| Authorization | `https://oauth.zaloapp.com/v4/permission` |
+| Access Token | `POST https://oauth.zaloapp.com/v4/access_token` |
+| User Profile | `GET https://graph.zalo.me/v2.0/me` (access_token in header) |
 
 ### Configure Strategy
 
 ```js
+var ZaloStrategy = require("@xvn/passport-zalo");
+
 passport.use(
-  new ZaloStategy(
+  new ZaloStrategy(
     {
       appId: ZALO_APP_ID,
       appSecret: ZALO_APP_SECRET,
-      callbackURL: "http://localhost:3000/auth/facebook/callback",
-      state: "test",
+      callbackURL: "http://localhost:3000/auth/zalo/callback",
     },
-    function (request, accessToken, profile, cb) {
-      // Do anything with params above
-      return cb(profile);
+    function (accessToken, refreshToken, profile, done) {
+      User.findOrCreate({ zaloId: profile.id }, function (err, user) {
+        return done(err, user);
+      });
     }
   )
 );
 ```
+
+#### Options
+
+| Option | Required | Description |
+|---|---|---|
+| `appId` | Yes | Zalo application ID |
+| `appSecret` | Yes | Zalo application secret |
+| `callbackURL` | Yes | URL to redirect after authorization |
+| `state` | No | CSRF state parameter |
+| `passReqToCallback` | No | When `true`, `req` is passed as the first argument to the verify callback |
+
+#### Verify Callback
+
+The verify callback receives the following arguments:
+
+```js
+function (accessToken, refreshToken, profile, done) { }
+
+// or with passReqToCallback: true
+function (req, accessToken, refreshToken, profile, done) { }
+```
+
+Call `done` with:
+- `done(err)` — on error
+- `done(null, user)` — on success
+- `done(null, false)` — on authentication failure
 
 ### Authenticate Requests
 
@@ -65,14 +98,75 @@ app.get(
   "/auth/zalo/callback",
   passport.authenticate("zalo", { failureRedirect: "/login" }),
   function (req, res) {
-    // Successful authentication, redirect home.
     res.redirect("/");
   }
 );
 ```
 
+### Full Example
+
+```js
+var express = require("express");
+var session = require("express-session");
+var passport = require("passport");
+var ZaloStrategy = require("@xvn/passport-zalo");
+
+var app = express();
+
+// Session is required for PKCE
+app.use(
+  session({ secret: "your-secret", resave: false, saveUninitialized: false })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+  new ZaloStrategy(
+    {
+      appId: process.env.ZALO_APP_ID,
+      appSecret: process.env.ZALO_APP_SECRET,
+      callbackURL: "http://localhost:3000/auth/zalo/callback",
+    },
+    function (accessToken, refreshToken, profile, done) {
+      // profile contains: id, name, birthday, gender, picture
+      return done(null, profile);
+    }
+  )
+);
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
+
+app.get("/auth/zalo", passport.authenticate("zalo"));
+app.get(
+  "/auth/zalo/callback",
+  passport.authenticate("zalo", { failureRedirect: "/login" }),
+  function (req, res) {
+    res.redirect("/");
+  }
+);
+
+app.listen(3000);
+```
+
+## Migration from v1.x
+
+v2.0 updates to the Zalo OAuth **v4 API** with several breaking changes:
+
+| v1.x (Zalo v3 API) | v2.0 (Zalo v4 API) |
+|---|---|
+| No PKCE | PKCE required (session middleware needed) |
+| `verify(req, accessToken, profile, cb)` | `verify(accessToken, refreshToken, profile, done)` |
+| No refresh token | Refresh token supported |
+| Access token via query param | Access token via header |
+| App secret via query param | App secret via `secret_key` header |
+
 ## License
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2020 Xuan Nguyen <[https://nguyenthanhxuan.name.vn](https://nguyenthanhxuan.name.vn)> @Email at [xuan12k@gmail.com](mailto:xuan12k@gmail.com)
+Copyright (c) 2020 Xuan Nguyen <[https://nguyenthanhxuan.name.vn](https://nguyenthanhxuan.name.vn)>
